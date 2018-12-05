@@ -47,7 +47,7 @@
             <i class="fa fa-times menu-close"></i>
             <a href="#header" class="data-scroll">Introduction</a>
             <a href="#dataset" class="data-scroll">DataSet</a>
-            <a href="#algorithms" class="data-scroll">Algorithms</a>
+            <!-- <a href="#algorithms" class="data-scroll">Algorithms</a> -->
             <a href="#implementation" class="data-scroll">Implementation</a>
             <!-- <a href="#instructions" class="data-scroll">Execution Instructions</a> -->
             <a href="#results" class="data-scroll">Results</a>
@@ -76,7 +76,7 @@
                       The motivation behind this project are the problems which we  faced  while searching for jobs.Job searching is a very frustrating process and we find most of the jobs search results to be irrelevant to what users search. For e.g. user might not have the required job experience and yet the search result will give jobs which expects some kind of experience. To get away from that we want to give a tool which can help to smooth the process.
                     </p>
                     <p class="intro">
-                      We are converting a user's information to a single vectore .Similary we have created a vector  for each job we have in the dataset.
+                      We are converting a user's information to a single vector .Similary we have created a vector  for each job we have in the dataset.
                       For the purpose of recommendation we are calculating cosine similarity between user's profile vector and job vectors and recommending the
                       top 10 jobs. For Predicting the salary range for the user we have developed a naive bayes classifier and a logistic regression
                       classifier.
@@ -99,10 +99,8 @@
                         The datset has 22k rows and 14 attributes.Each row is a job posting with features like job description, job title,location,organization,salary etc.In the dataset salary(yearly) is a continious valued feature.We are dividing it into 7 classes 0-30K,40-50K,50-60K,60-70K,70-90K and greater than 90K.A sample snapshot of the data is given below. <a href="https://www.kaggle.com/PromptCloudHQ/us-jobs-on-monstercom/home" target="_blank">Click here to download the data.</a>
                     </p>
 
-                    <iframe  width="1150" height="250" src="https://docs.google.com/spreadsheets/d/10N0I5dty8gY2nZ51ulPoyztTRPgqdBF2Tmd7TfkE3iI/edit?usp=sharing"></iframe>
-
                     <p class="intro">
-                    Data Preparation: We are workig with 4 features :job description,location,job type(full time or temprorary),organization.For converting words to vectors we have used word embeddings(Glove vectors for Word Representation developed in Stanford).Glove gives  us 1 * 50 dimension vector for a word.For getting a single vector  for a
+                    Data Preparation: We are workig with 4 features :job description,location,job type(full time or temprorary),organization and salary.For converting words to vectors we have used word embeddings(Glove vectors for Word Representation developed in Stanford).Glove gives  us 1 * 50 dimension vector for a word.For getting a single vector  for a
                     feature like  job description which has multiple words: we are finding vectors for each  word and
                     adding them to get the resultant vector.If any word is not present in the Glove vector we are using the vector for 'unk' (unknown).
                     </p>
@@ -125,8 +123,8 @@
 										<h6>Cosine Similarity Implementation</h6>
                     <p class="intro">
 					First we computed the TF-IDF of each of the word w.r.t to each row(Job description as the document and dumped to an external file.)
-					Then we converted all the words of the Job description in each of the row into its corresponding word vectors using Glove Vectors. We multiplied each word vector with a smoothing parameter and then multiplied each of them with their corresponding TF-IDF value.
-					
+					Then we converted all the words of the Job description in each of the row into its corresponding word vectors using Glove Vectors. We multiplied each word vector  with their corresponding TF-IDF value.
+
 					</p>
 					<p class="intro">
 					Our input to computing Document similarity includes TF-IDF scores computed, resume file for which you need to find the similarity and finally the keywords you want to search for. </br>
@@ -138,27 +136,27 @@
 					</br>
                     Then take the dot product of above computed word vector with resume word vector to return the similarity score.</br>
 					</p>
-					
+
 					<h6>K Means Implementation</h6>
                     <p class="intro">
-					
-					
+
+
 		The input for KMeans implementation is a comma separated csv with values of job description, organization and salary. We are putting this csv in the Amazon S3 bucket and reading it as RDD from spark program. <p>
 <p class="intro">
-					
+
 		Using elbow method, for our dataset we have found out the number of clusters we need for KMeans as 5. So in our program we took the 5 sample records from RDD as the initial cluster points. </p>
- <p class="intro">	
+ <p class="intro">
 		In the mapper, for each documents we find out the closest cluster point among the 5 clusters by calculating the euclidean distance between the point and cluster point and transform the values as (closest cluster center, point ) using lambda function. In the reducer for each cluster center we take the average of points associated with that cluster center using reduceByKey method. The average of these points will be the new cluster center. We are doing these steps for 100 iteration. Instead of doing the steps for a number of iteration, we also tried the till the difference between the sum of old cluster center points and new cluster center points become lesser than a threshold. </p>
 					</p>
 					</br>
-					
+
                     <h6>Naive Bayes Implementation</h6>
                     <p class="intro">
-					Input to naive bayes is a csv file with 1994 records with job description and salary class as the columns. Salary is divided into 7 classes and corresponding label is used (i.e, 0,1,2...6) in the input file.
-                    We have implemented the naive bayes in Amazon S3 and Amazon Elastic Mapreduce (EMR) with 3 clusters. From the python file, Initially we read the input file from S3 bucket  as RDD 
+					Input to naive bayes is a csv file with job description and salary class as the columns. Salary is divided into 7 classes and corresponding label is used (i.e, 0,1,2...6) in the input file.
+                    We have implemented the naive bayes in Amazon S3 and Amazon Elastic Mapreduce (EMR) with 3 clusters. From the python file, Initially we read the input file from S3 bucket  as RDD
                     </p>
 					<p class="intro"> Conditional Probability :</br>
-					    
+
 In order to form the conditional probability of each words in each class we have to prepare set of data. <br>
 
 <p class="intro">We need to form a RDD which contains only the  unique words in the whole corpus. This will be used for forming the conditional probability matrix for each unique words. To form the unique word RDD, In the map function, while reading each line from the input RDD we emit a tuple like (word,1) and in the reducer we grouped the words using reducebykey function. Also the number of unique words is calculated using count() function. </p>
@@ -166,7 +164,7 @@ In order to form the conditional probability of each words in each class we have
 <p class="intro">       To find the no of occurence of words in each class , we are using the above RDD. We will be emitting the key value pair as (word#class,1) as the tuple. In the reducer we are combining the keys. So that for each word we will get the number of occurence in Each class. This RDD can be used to find the conditional probability of a word in a classes. To do that we are emitting the dividing the count of each words in class by total number of words in that class.  So we got the conditional probability of words present in each class. </p>
  <p class="intro">          Now we have to find the conditional probability of each unique word and its conditional probability for each class. In Order to calculate the conditional probability of a word for each class we have defined a function callled wordClassProbailityCalculateUsingMap. First  we are finding the sum of smoothing factor and count of the word in the class. We are storing it as the numerator. We are taking the smoothing factor as 1. For the denominator part, we are adding the number of words in the class and product of smoothing factor and no of unique words in the document. We are doing this for each class for a given word. Then we divide the numerator by denominator and take log of its value.So we got the conditional probability of a word in each classes. We are storing this results as an RDD and storing it as a text file in Amazon S3 Bucket. </p>
  </P>
- 
+
 <p class="intro"> Prior probability of classes :</br>
 Prior probability of each class is calculated by emitting (class,1) by reading  the input file RDD. In the reducer we add the number of 1 associated with a class by using reducebykey method.also we are dividing the total sum of 1 by total number of documents in that class. This result is stored in the Amazon S3 bucket.
 </p>
@@ -174,20 +172,20 @@ Prior probability of each class is calculated by emitting (class,1) by reading  
 <p class="intro">Predicting the salary :</br>
 In Order to predict the salary of a given resume,first we are reading the conditional probability matrix and prior probability matrix from the amazon s3 bucket as RDD. For each words in the resume, we are adding the conditional probability for each classes and multiplying it with class prior probability also. Among the these probabilities which class giving the maximum probability is the predicted salary class of the given resume.
 
-                       
+
                     </p>
-					
+
 
                     <h6>Logistic Regression Implementation</h6>
                     <p class="intro">
-					
+
 Assuming independently identically distributed data, we can compute the likelihood as
 
 $$
 P(T \mid x) = \prod_{n=1}^{N} \prod_{k=1}^{K} P(T = k \mid x_n)^{t_{n,k}} = \prod_{n=1}^{N} \prod_{k=1}^{K} y_{n,k}^{t_{n,k}}
 $$
 
-To generate multiple probability outputs for each class, we consider the indicator output targets. 
+To generate multiple probability outputs for each class, we consider the indicator output targets.
 
 $$
 T = \begin{bmatrix}
@@ -197,7 +195,7 @@ T = \begin{bmatrix}
         t_{N,1} & t_{N,2} & \cdots & t_{N, K} \\
       \end{bmatrix}
 $$
-where $t_{n,k}$ is 0 or 1 with only one 1 per each row. 
+where $t_{n,k}$ is 0 or 1 with only one 1 per each row.
 
 
 We define our error function as:
@@ -218,7 +216,7 @@ We use softmax function for getting the probability of the class:
 $$
 g_k(x) = P(T=k \mid x) = \frac{\kappa_k}{\sum_{c=1}^K \kappa_c}
 $$
-where, 
+where,
 $$
 \kappa = f(x ; w) = X w.
 $$
@@ -236,19 +234,19 @@ $$
 1. For every sample we need to calculate the gradient which can be done using map function. </br>
 2. The gradient is being calculated for each class(we have k classes) and we emit (k,v) pair of (class, gradient). </br>
 3. Then we will use reduceByKey to calculate the total gradients and update the weight matrix for the kth class. </br>
-4. The updated matrix is then broadcasted to all the partitions so that the new gradient calculated is always with  
+4. The updated matrix is then broadcasted to all the partitions so that the new gradient calculated is always with
    the latest weight matrix. </br>
 5. We will finally check for convergence by checking if the new weight matrix has changed w.r.t the old weight matrix, </br>
    if it hasnt we break and the algorithm has converged else we will keep it running for n iterations.
 
                     </p>
-					</br>	
-					
+					</br>
+
                     <h6>Things we learnt</h6>
 					<p class="intro">
                     <ul>
                         <li class="intro">One of the biggest learning for us from this project is that not all the algorithms work on all the data.Logistic regression in our case is predicting only one class for all the test examples</li>
-                        <li class="intro">In case of naive bayes class distribution or no of traning examples belonging from each class affects the model performance greatly.In our case we initialy strarted with 13 classes with some classes with very few records in them.For this data the model accuracy was not good(12%).Then we combine some classes in order  to make sufficient examples  in each class;this increases our model performance to 84%</li>
+                        <li class="intro">In case of naive bayes class distribution and  total no of  words in each class affects the model performance greatly.In our case we initialy strarted with 13 classes with some classes with low total no of words in comparision to other classes.For this data the model accuracy was not good(12%).Then we combine some classes in order  to make sufficient examples  in each class and increase the no of words in each class;this increased our model performance to 84%</li>
                     </ul>
 					</p>
                     <h6>Technologies Used</h6>
@@ -476,7 +474,7 @@ $$
                     <td style="width: 66px; height: 39px; text-align: center;">223</td>
                     <td style="width: 93.8px; height: 39px; text-align: center;">&nbsp;0</td>
 
-                 
+
                     <div class="output vbox">
                     <div class="output_area">
                     <div class="prompt">&nbsp;</div>
